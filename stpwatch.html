@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sci-Fi Stopwatch</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1585241645927-c7a8e5840c42?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            color: #0ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #stopwatch {
+            font-size: 4em;
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff, 0 0 80px #0ff;
+            text-align: center;
+        }
+
+        #buttons {
+            margin-bottom: 20px;
+        }
+
+        button {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            margin: 0 20px;
+            background-color: #333;
+            border: 2px solid #0ff;
+            color: #0ff;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            border-radius: 5px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        button:hover {
+            background-color: #0ff;
+            color: #000;
+        }
+
+        #laps {
+            text-align: left;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .lap-time {
+            font-size: 1em;
+            margin-bottom: 5px;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="stopwatch" class="pulse">00:00:00.00</div>
+    <div id="buttons">
+        <button id="startStopButton" onclick="startStop()">Start</button>
+        <button onclick="lap()">Lap</button>
+        <button onclick="reset()">Reset</button>
+    </div>
+    <div id="laps"></div>
+
+    <script>
+        let startTime;
+        let running = false;
+        let laps = [];
+
+        function startStop() {
+            if (!running) {
+                start();
+            } else {
+                stop();
+            }
+        }
+
+        function start() {
+            startTime = Date.now() - (laps.length > 0 ? laps[laps.length - 1].time : 0);
+            running = true;
+            document.getElementById("startStopButton").innerText = "Stop";
+            update();
+        }
+
+        function stop() {
+            running = false;
+            document.getElementById("startStopButton").innerText = "Start";
+        }
+
+        function reset() {
+            startTime = undefined;
+            running = false;
+            laps = [];
+            document.getElementById("startStopButton").innerText = "Start";
+            update();
+            document.getElementById("laps").innerText = "";
+        }
+
+        function lap() {
+            if (running) {
+                const lapTime = Date.now() - startTime;
+                laps.push({ time: lapTime });
+                update();
+                displayLap(lapTime);
+            }
+        }
+
+        function update() {
+            if (running) {
+                const elapsedTime = Date.now() - startTime;
+                document.getElementById("stopwatch").innerText = formatTime(elapsedTime);
+            } else {
+                document.getElementById("stopwatch").innerText = "00:00:00.00";
+            }
+        }
+
+        function formatTime(time) {
+            const hours = Math.floor(time / 3600000);
+            const minutes = Math.floor((time % 3600000) / 60000);
+            const seconds = Math.floor((time % 60000) / 1000);
+            const hundredths = Math.floor((time % 1000) / 10);
+            return (
+                String(hours).padStart(2, "0") +
+                ":" +
+                String(minutes).padStart(2, "0") +
+                ":" +
+                String(seconds).padStart(2, "0") +
+                "." +
+                String(hundredths).padStart(2, "0")
+            );
+        }
+
+        function displayLap(lapTime) {
+            const lapDiv = document.createElement("div");
+            lapDiv.classList.add("lap-time");
+            lapDiv.innerText = "Lap: " + formatTime(lapTime);
+            document.getElementById("laps").appendChild(lapDiv);
+        }
+
+        setInterval(update, 10); // Update every hundredth of a second
+    </script>
+</body>
+</html>
